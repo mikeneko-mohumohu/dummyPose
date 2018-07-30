@@ -1,0 +1,162 @@
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <!-- Load TensorFlow.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.11.7"></script>
+    <!-- Load Posenet -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet@0.1.2"></script>
+ </head>
+
+  <body>    
+    <video id="camera" playsinline style="-moz-transform: scaleX(-1); -o-transform: scaleX(-1); -webkit-transform: scaleX(-1); transform: scaleX(-1); display: none;"></video>
+    <!-- 記録用canvas -->
+    <canvas id="canvas" ></canvas>
+</body>
+
+<script>
+
+const videoWidth=500;
+const videoHeight=500;
+const color = "aqua";
+const lineWidth = 2;
+
+async function setupCamera() {
+    const video = document.getElementById('camera');
+    video.width = videoWidth;
+　  video.height = videoHeight;
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          'audio': false,
+          'video': {
+            facingMode: 'user',
+            width: videoWidth,
+            height: videoHeight}
+        });
+    video.srcObject = stream;
+    
+    return new Promise(resolve => {
+      video.onloadedmetadata = () => {
+        resolve(video);
+      };
+    });
+    } else {
+      const errorMessage = "This browser does not support video capture, or this device does not have a camera";
+      alert(errorMessage);
+      return Promise.reject(errorMessage);
+  }
+}
+
+
+function take_picture(video, net) {
+    const canvas = document.getElementById('canvas');
+    canvas.width = videoWidth;
+    canvas.height = videoHeight;
+    const ctx = canvas.getContext('2d');
+    
+    const imageScaleFactor = 0.5;
+    const flipHorizontal = false;
+    const outputStride = 16;
+    const minPoseConfidence = 0.1;
+    const minPartConfidence = 0.5;
+
+    async function poseDetectionFrame() {
+        let poses = [];
+        var date = new Date();
+        
+        const pose = await net.estimateSinglePose(video, imageScaleFactor, flipHorizontal, outputStride);
+        poses.push(pose);
+
+        ctx.clearRect(0, 0, videoWidth, videoHeight);
+
+        ctx.save();
+// 鏡にしたい場合
+//        ctx.scale(-1, 1);
+//        ctx.translate(-videoWidth, 0);
+
+// カメラ写す場合
+//        ctx.drawImage(video, 0, 0, videoWidth, videoHeight);
+
+ctx.fillStyle = "rgb(200,0,0)";
+ctx.fillRect(0,0,videoWidth,videoHeight);
+        ctx.restore();
+
+
+        // For each pose (i.e. person) detected in an image, loop through the poses
+        // and draw the resulting skeleton and keypoints if over certain confidence
+        // scores
+        
+        poses.forEach(({ score, keypoints }) => {
+            if (score >= minPoseConfidence) {
+              drawKeypoints(keypoints, minPartConfidence, ctx);
+              drawSkeleton(keypoints, minPartConfidence, ctx);
+          }
+        });
+    
+    // End monitoring code for frames per second
+
+        requestAnimationFrame(poseDetectionFrame);
+    }
+
+  poseDetectionFrame();
+}
+
+function drawKeypoints(keypoints, minConfidence, ctx, scale = 1) {
+  for (let i = 0; i < keypoints.length; i++) {
+    const keypoint = keypoints[i];
+
+    if (keypoint.score < minConfidence) {
+      continue;
+    }
+
+    const { y, x } = keypoint.position;
+    ctx.beginPath();
+    ctx.arc(x * scale, y * scale, 3, 0, 2 * Math.PI);
+    ctx.fillStyle = color;
+    ctx.fill();
+
+  }
+}
+
+function toTuple({ y, x }) {
+  return [y, x];
+}
+
+function drawSkeleton(keypoints, minConfidence, ctx, scale = 1) {
+  const adjacentKeyPoints = posenet.getAdjacentKeyPoints(
+    keypoints, minConfidence);
+
+  adjacentKeyPoints.forEach((keypoints) => {
+    drawSegment(toTuple(keypoints[0].position),
+      toTuple(keypoints[1].position), color, scale, ctx);
+  });
+}
+
+function drawSegment([ay, ax], [by, bx], color, scale, ctx) {
+  ctx.beginPath();
+  ctx.moveTo(ax * scale, ay * scale);
+  ctx.lineTo(bx * scale, by * scale);
+  ctx.lineWidth = lineWidth;
+  ctx.strokeStyle = color;
+  ctx.stroke();
+}
+
+async function loadVideo() {
+  const video = await setupCamera();
+  video.play();
+
+  return video;
+}
+
+async function main(){
+    const net = await posenet.load();
+
+    let video;
+    video = await loadVideo();
+    
+    take_picture(video, net);
+}
+
+main();
+
+  </script>
+</html>
