@@ -13,16 +13,21 @@
   <body>    
     <video id="camera" playsinline style="-moz-transform: scaleX(-1); -o-transform: scaleX(-1); -webkit-transform: scaleX(-1); transform: scaleX(-1); display: none;"></video>
     <!-- 記録用canvas -->
-    <canvas id="camera-canvas" style="display: none;"></canvas>
+    <canvas id="camera-canvas"></canvas>
     <!-- 3D用canvas -->
     <canvas id="canvas" ></canvas>
 </body>
 
 <script>
+var rightShoulder ={x:0,y:0}
+var rightElbow={x:0,y:0}
+var rightWrist={x:0,y:0}
+const videoWidth = 500;
+const videoHeight = 500;
 //----- ここから３D描画 -----//
 function init() {
-  var width = 500;
-  var height = 500;
+  var width = videoWidth;
+  var height = videoHeight;
   var renderer = new THREE.WebGLRenderer({
     canvas: document.getElementById("canvas"),
     alpha: false,
@@ -38,7 +43,7 @@ function init() {
   var gridHelper = new THREE.GridHelper(200,5);
   scene.add(gridHelper);
   var axisHelper = new THREE.AxesHelper(300);
-  scene.add(axisHelper);
+  //scene.add(axisHelper);
 
   var controlCamera = new THREE.PerspectiveCamera(45, width / height, 1, 4000);
   controlCamera.position.set(0,10,100);
@@ -46,57 +51,40 @@ function init() {
 
 
 
-  var armGeometry = new THREE.CylinderGeometry(5,5,40,3,4,true);
+  var armGeometry = new THREE.CylinderGeometry(5,5,40,3,2,true);
   armGeometry.bones = [{
     name: "bone0",
-    parent: -1,
-    pos: [0, -20, 0],
+    parent: 1,
+    pos: [0, -15, 0],
     rotq: [0, 0, 0, 1],
     scl: [1, 1, 1],
   },
   {
     name: "bone1",
-    parent: 0,
-    pos: [0, 10, 0],
+    parent: 2,
+    pos: [0, -25, 0],
     rotq: [0, 0, 0, 1],
     scl: [1, 1, 1],
   },
   {
     name: "bone2",
-    parent: 1,
-    pos: [0, 10, 0],
+    parent: -1,
+    pos: [0, 20, 0],
     rotq: [0, 0, 0, 1],
     scl: [1, 1, 1],
-  },
-  {
-    name: "bone3",
-    parent: 2,
-    pos: [0, 10, 0],
-    rotq: [0, 0, 0, 1],
-    scl: [1, 1, 1],
-  },
-  {
-    name: "bone4",
-    parent: 3,
-    pos: [0, 10, 0],
-    rotq: [0, 0, 0, 1],
-    scl: [1, 1, 1],
-  }]
+  }
+  ];
 
   armGeometry.skinIndices = [
-  new THREE.Vector4(4, 3, -1, -1), new THREE.Vector4(4, 3, -1, -1), new THREE.Vector4(4, 3, -1, -1),
-  new THREE.Vector4(3, 4,  2, -1), new THREE.Vector4(3, 4,  2, -1), new THREE.Vector4(3, 4,  2, -1),
-  new THREE.Vector4(2, 3,  1, -1), new THREE.Vector4(2, 3,  1, -1), new THREE.Vector4(2, 3,  1, -1),
-  new THREE.Vector4(1, 2,  0, -1), new THREE.Vector4(1, 2,  0, -1), new THREE.Vector4(1, 2,  0, -1),
+  new THREE.Vector4(2, -1,  -1, -1), new THREE.Vector4(2, -1,  -1, -1), new THREE.Vector4(2, -1,  -1, -1),
+  new THREE.Vector4(1, 2,  -1, -1), new THREE.Vector4(1, 2,  -1, -1), new THREE.Vector4(1, 2,  -1, -1),
   new THREE.Vector4(0, 1, -1, -1), new THREE.Vector4(0, 1, -1, -1), new THREE.Vector4(0, 1, -1, -1),
   ]
 
   armGeometry.skinWeights = [
-  new THREE.Vector4(.8, .2,  0, 0), new THREE.Vector4(.8, .2,  0, 0), new THREE.Vector4(.8, .2,  0, 0),
-  new THREE.Vector4(.6, .2, .2, 0), new THREE.Vector4(.6, .2, .2, 0), new THREE.Vector4(.6, .2, .2, 0),
-  new THREE.Vector4(.6, .2, .2, 0), new THREE.Vector4(.6, .2, .2, 0), new THREE.Vector4(.6, .2, .2, 0),
-  new THREE.Vector4(.6, .2, .2, 0), new THREE.Vector4(.6, .2, .2, 0), new THREE.Vector4(.6, .2, .2, 0),
-  new THREE.Vector4(.8, .2,  0, 0), new THREE.Vector4(.8, .2,  0, 0), new THREE.Vector4(.8, .2,  0, 0),
+  new THREE.Vector4(.10, .0,  0, 0), new THREE.Vector4(.10, .0,  0, 0), new THREE.Vector4(.10, .0,  0, 0),
+  new THREE.Vector4(.6, .4,  0, 0), new THREE.Vector4(.6, .4,  0, 0), new THREE.Vector4(.6, .4,  0, 0),
+  new THREE.Vector4(.6, .4, .0, 0), new THREE.Vector4(.6, .4, .0, 0), new THREE.Vector4(.6, .4, .0, 0),
 ];
 
   var armMaterial = new THREE.MeshNormalMaterial({
@@ -122,10 +110,19 @@ function init() {
   function render() {
     controls.update();
     var time = new Date();
-    arm.rotation.y += (time - lastTime) * 0.0002;
-    arm.skeleton.bones[1].rotation.z = Math.sin(time * 0.001) * .5;
-    arm.skeleton.bones[2].rotation.y = Math.sin(time * 0.002) * 1;
-    arm.skeleton.bones[3].rotation.x = Math.sin(time * 0.003) * .5;
+    //arm.rotation.y += (time - lastTime) * 0.0002;
+    arm.skeleton.bones[0].position.x = (rightElbow.x - rightWrist.x)/10;
+    arm.skeleton.bones[1].position.x = (rightShoulder.x - rightElbow.x)/10;
+    arm.skeleton.bones[2].position.x = (rightShoulder.x)/10;
+    arm.skeleton.bones[0].position.y = (rightElbow.y - rightWrist.y)/10;
+    arm.skeleton.bones[1].position.y = (rightShoulder.y - rightElbow.y)/10;
+    arm.skeleton.bones[2].position.y = (rightShoulder.y)/10;
+
+    console.log(arm.skeleton.bones[0].position)
+    //console.log(arm.skeleton.bones[1].position)
+    //console.log(arm.skeleton.bones[2].position)
+
+//    arm.skeleton.bones[2].rotation.x = Math.sin(time * 0.002) * .5;
 
     renderer.render(scene, controlCamera);
     lastTime = time;
@@ -140,8 +137,6 @@ init();
 
 
 //----- ここから骨取得 -----//
-const videoWidth=500;
-const videoHeight=500;
 const color = "aqua";
 const lineWidth = 2;
 
@@ -228,6 +223,11 @@ ctx.fillRect(0,0,videoWidth,videoHeight);
 function drawKeypoints(keypoints, minConfidence, ctx, scale = 1) {
   for (let i = 0; i < keypoints.length; i++) {
     const keypoint = keypoints[i];
+
+    if (keypoint.part == "rightShoulder"){rightShoulder = keypoint.position}
+    if(keypoint.part == "rightElbow"){rightElbow = keypoint.position}
+    if(keypoint.part == "rightWrist"){rightWrist = keypoint.position}
+      
 
     if (keypoint.score < minConfidence) {
       continue;
