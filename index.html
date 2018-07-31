@@ -112,18 +112,23 @@ function init() {
   scene.add(arm);
   scene.add(skeletonHelper);
 
-  function animate() {
+  function animate(time) {
     requestAnimationFrame(animate);
-    render();
+    render(time);
   }
 
   var lastTime = 0;
 
-  function render(time) {
+  function render() {
     controls.update();
-    arm.rotation.y += lastTime * 0.0002;
+    var time = new Date();
+    arm.rotation.y += (time - lastTime) * 0.0002;
+    arm.skeleton.bones[1].rotation.z = Math.sin(time * 0.001) * .5;
+    arm.skeleton.bones[2].rotation.y = Math.sin(time * 0.002) * 1;
+    arm.skeleton.bones[3].rotation.x = Math.sin(time * 0.003) * .5;
+
     renderer.render(scene, controlCamera);
-    lastTime = lastTime +1;
+    lastTime = time;
   }
 
   animate()
