@@ -105,7 +105,7 @@ function init() {
     flatShading: THREE.FlatShading,
   });
 
-  var arm = new THREE.Mesh(armGeometry,armMaterial);
+  var arm = new THREE.SkinnedMesh(armGeometry,armMaterial);
   var skeletonHelper = new THREE.SkeletonHelper(arm);
   skeletonHelper.material.linewidth = 10;
 
