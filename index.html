@@ -5,16 +5,136 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.11.7"></script>
     <!-- Load Posenet -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet@0.1.2"></script>
- </head>
+    <!-- THREE JS -->
+    <script src="js/three.min.js"></script>
+    <script src="js/OrbitControls.js"></script>
+  </head>
 
   <body>    
     <video id="camera" playsinline style="-moz-transform: scaleX(-1); -o-transform: scaleX(-1); -webkit-transform: scaleX(-1); transform: scaleX(-1); display: none;"></video>
     <!-- 記録用canvas -->
+    <canvas id="camera-canvas" style="display: none;"></canvas>
+    <!-- 3D用canvas -->
     <canvas id="canvas" ></canvas>
 </body>
 
 <script>
+//----- ここから３D描画 -----//
+function init() {
+  var width = 500;
+  var height = 500;
+  var renderer = new THREE.WebGLRenderer({
+    canvas: document.getElementById("canvas"),
+    alpha: false,
+    antialias: true
+  });
+  renderer.setClearColor(0xf3f3f3,1.0);
+  renderer.setSize(width,height);
 
+  var scene = new THREE.Scene();
+  
+  ambient = new THREE.AmbientLight(0xeeeeee,1);
+  scene.add(ambient);
+  var gridHelper = new THREE.GridHelper(200,5);
+  scene.add(gridHelper);
+  var axisHelper = new THREE.AxesHelper(300);
+  scene.add(axisHelper);
+
+  var controlCamera = new THREE.PerspectiveCamera(45, width / height, 1, 4000);
+  controlCamera.position.set(0,10,100);
+  var controls = new THREE.OrbitControls(controlCamera);
+
+
+
+  var armGeometry = new THREE.CylinderGeometry(5,5,40,3,4,true);
+  armGeometry.bones = [{
+    name: "bone0",
+    parent: -1,
+    pos: [0, -20, 0],
+    rotq: [0, 0, 0, 1],
+    scl: [1, 1, 1],
+  },
+  {
+    name: "bone1",
+    parent: 0,
+    pos: [0, 10, 0],
+    rotq: [0, 0, 0, 1],
+    scl: [1, 1, 1],
+  },
+  {
+    name: "bone2",
+    parent: 1,
+    pos: [0, 10, 0],
+    rotq: [0, 0, 0, 1],
+    scl: [1, 1, 1],
+  },
+  {
+    name: "bone3",
+    parent: 2,
+    pos: [0, 10, 0],
+    rotq: [0, 0, 0, 1],
+    scl: [1, 1, 1],
+  },
+  {
+    name: "bone4",
+    parent: 3,
+    pos: [0, 10, 0],
+    rotq: [0, 0, 0, 1],
+    scl: [1, 1, 1],
+  }]
+
+  armGeometry.skinIndices = [
+  new THREE.Vector4(4, 3, -1, -1), new THREE.Vector4(4, 3, -1, -1), new THREE.Vector4(4, 3, -1, -1),
+  new THREE.Vector4(3, 4,  2, -1), new THREE.Vector4(3, 4,  2, -1), new THREE.Vector4(3, 4,  2, -1),
+  new THREE.Vector4(2, 3,  1, -1), new THREE.Vector4(2, 3,  1, -1), new THREE.Vector4(2, 3,  1, -1),
+  new THREE.Vector4(1, 2,  0, -1), new THREE.Vector4(1, 2,  0, -1), new THREE.Vector4(1, 2,  0, -1),
+  new THREE.Vector4(0, 1, -1, -1), new THREE.Vector4(0, 1, -1, -1), new THREE.Vector4(0, 1, -1, -1),
+  ]
+
+  armGeometry.skinWeights = [
+  new THREE.Vector4(.8, .2,  0, 0), new THREE.Vector4(.8, .2,  0, 0), new THREE.Vector4(.8, .2,  0, 0),
+  new THREE.Vector4(.6, .2, .2, 0), new THREE.Vector4(.6, .2, .2, 0), new THREE.Vector4(.6, .2, .2, 0),
+  new THREE.Vector4(.6, .2, .2, 0), new THREE.Vector4(.6, .2, .2, 0), new THREE.Vector4(.6, .2, .2, 0),
+  new THREE.Vector4(.6, .2, .2, 0), new THREE.Vector4(.6, .2, .2, 0), new THREE.Vector4(.6, .2, .2, 0),
+  new THREE.Vector4(.8, .2,  0, 0), new THREE.Vector4(.8, .2,  0, 0), new THREE.Vector4(.8, .2,  0, 0),
+];
+
+  var armMaterial = new THREE.MeshNormalMaterial({
+    skinning: true,
+    side: THREE.DoubleSide,
+    flatShading: THREE.FlatShading,
+  });
+
+  var arm = new THREE.Mesh(armGeometry,armMaterial);
+  var skeletonHelper = new THREE.SkeletonHelper(arm);
+  skeletonHelper.material.linewidth = 10;
+
+  scene.add(arm);
+  scene.add(skeletonHelper);
+
+  function animate() {
+    requestAnimationFrame(animate);
+    render();
+  }
+
+  var lastTime = 0;
+
+  function render(time) {
+    controls.update();
+    arm.rotation.y += lastTime * 0.0002;
+    renderer.render(scene, controlCamera);
+    lastTime = lastTime +1;
+  }
+
+  animate()
+}
+
+init();
+
+
+
+
+//----- ここから骨取得 -----//
 const videoWidth=500;
 const videoHeight=500;
 const color = "aqua";
@@ -47,8 +167,8 @@ async function setupCamera() {
 }
 
 
-function take_picture(video, net) {
-    const canvas = document.getElementById('canvas');
+function takePicture(video, net) {
+    const canvas = document.getElementById('camera-canvas');
     canvas.width = videoWidth;
     canvas.height = videoHeight;
     const ctx = canvas.getContext('2d');
@@ -73,7 +193,7 @@ function take_picture(video, net) {
 //        ctx.scale(-1, 1);
 //        ctx.translate(-videoWidth, 0);
 
-// カメラ写す場合
+// カメラ写す場合　今回は骨さえ取れればいいのでいらん
 //        ctx.drawImage(video, 0, 0, videoWidth, videoHeight);
 
 ctx.fillStyle = "rgb(200,0,0)";
@@ -153,7 +273,7 @@ async function main(){
     let video;
     video = await loadVideo();
     
-    take_picture(video, net);
+    takePicture(video, net);
 }
 
 main();
