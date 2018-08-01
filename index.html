@@ -19,8 +19,10 @@
 </body>
 
 <script>
-var maxRightShoulderToElbow = 0;
-var maxLeftShoulderToElbow = 0;
+var nowRightShoulderToElbow = 0;
+var nowLeftShoulderToElbow = 0;
+var maxRightShoulderToElbow = 1;
+var maxLeftShoulderToElbow = 1;
 
 var rightShoulder ={x:0,y:0}
 var rightElbow={x:0,y:0}
@@ -159,9 +161,15 @@ function init() {
     var leftRag = Math.sin(Math.atan2(leftElbow.y - leftShoulder.y, leftElbow.x - leftShoulder.x))+1;
 //    console.log(maxRightShoulderToElbow);
 //  console.log(Math.sin(Math.atan2(rightElbow.y - rightShoulder.y, rightElbow.x - rightShoulder.x) + 90));
+  //character.skeleton.bones[10].rotation.x = -1* rightRag;
+  //character.skeleton.bones[8].rotation.x = leftRag;
 
-  character.skeleton.bones[10].rotation.x = -1* rightRag;
-  character.skeleton.bones[8].rotation.x = leftRag;
+  var leftCos = nowLeftShoulderToElbow / maxLeftShoulderToElbow
+  var rightCos = nowRightShoulderToElbow / maxRightShoulderToElbow
+  console.log(character.skeleton.bones[8].rotation);
+
+//  character.skeleton.bones[10].rotation.z = 0;//-1 * rightCos;
+//  character.skeleton.bones[8].rotation.z = -3;//leftCos;
 
   var delta = clock.getDelta();
     mixer.update(delta);
@@ -185,6 +193,9 @@ index.html:145 We {x: -2.32831e-9, y: 6.4475e-8, z: -0.3863}//右手
 //    arm.skeleton.bones[2].rotation.x = Math.sin(time * 0.002) * .5;
     renderer.render(scene, controlCamera);
     lastTime = time;
+
+    oldLeftShoulderToElbow = nowLeftShoulderToElbow;
+    oldRightShoulderToElbow = nowRightShoulderToElbow;
   }
 
   //animate()
@@ -295,11 +306,10 @@ function drawKeypoints(keypoints, minConfidence, ctx, scale = 1) {
     if(keypoint.part == "leftElbow"){leftElbow = keypoint.position}
     if(keypoint.part == "leftWrist"){leftWrist = keypoint.position}
 
-    var maxRight = Math.sqrt(Math.pow(rightElbow.x - rightShoulder.x,2)+Math.pow(rightElbow.y - rightShoulder.y,2));
-    var maxLeft = Math.sqrt(Math.pow(leftElbow.x - leftShoulder.x,2)+Math.pow(leftElbow.y - leftShoulder.y,2));
-
-    maxRightShoulderToElbow = (maxRight > maxRightShoulderToElbow) ? maxRight : maxRightShoulderToElbow;
-    maxLeftShoulderToElbow = (maxLeft > maxLeftShoulderToElbow) ? maxLeft : maxLeftShoulderToElbow;
+    nowRightShoulderToElbow = Math.sqrt(Math.pow(rightElbow.x - rightShoulder.x,2)+Math.pow(rightElbow.y - rightShoulder.y,2));
+    nowLeftShoulderToElbow  = Math.sqrt(Math.pow(leftElbow.x - leftShoulder.x,2)+Math.pow(leftElbow.y - leftShoulder.y,2));
+    maxRightShoulderToElbow = (nowRightShoulderToElbow > maxRightShoulderToElbow) ? nowRightShoulderToElbow: maxRightShoulderToElbow;
+    maxLeftShoulderToElbow = (nowLeftShoulderToElbow > maxLeftShoulderToElbow)? nowLeftShoulderToElbow : maxLeftShoulderToElbow;
 
     const { y, x } = keypoint.position;
     ctx.beginPath();
