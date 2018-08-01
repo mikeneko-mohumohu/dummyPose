@@ -19,9 +19,17 @@
 </body>
 
 <script>
+var maxRightShoulderToElbow = 0;
+var maxLeftShoulderToElbow = 0;
+
 var rightShoulder ={x:0,y:0}
 var rightElbow={x:0,y:0}
 var rightWrist={x:0,y:0}
+
+var leftShoulder ={x:0,y:0}
+var leftElbow={x:0,y:0}
+var leftWrist={x:0,y:0}
+
 const videoWidth = 500;
 const videoHeight = 500;
 //----- ここから３D描画 -----//
@@ -36,6 +44,7 @@ function init() {
   renderer.setClearColor(0xf3f3f3,1.0);
   renderer.setSize(width,height);
 
+  var clock = new THREE.Clock();
   var scene = new THREE.Scene();
   
   ambient = new THREE.AmbientLight(0xeeeeee,1);
@@ -97,8 +106,40 @@ function init() {
   var skeletonHelper = new THREE.SkeletonHelper(arm);
   skeletonHelper.material.linewidth = 10;
 
-  scene.add(arm);
-  scene.add(skeletonHelper);
+  //scene.add(arm);
+  //scene.add(skeletonHelper);
+  var character;
+  var mixer;
+  var action = {};
+  var textureLoader = new THREE.TextureLoader();
+  textureLoader.load('./model/fox.png',
+    texture => {
+      var material = new THREE.MeshBasicMaterial({
+        map: texture,
+        skinning: true,// これ忘れないよう注意　スキンとボーンの追従
+      });
+
+      var loader = new THREE.JSONLoader();
+      loader.load('./model/fox.json', function(geometry) {
+        character = new THREE.SkinnedMesh(geometry, material);
+/*
+        var characterSkeletonHelper = new THREE.SkeletonHelper(character);
+        characterSkeletonHelper.material.linewidth = 10;
+        scene.add(characterSkeletonHelper);
+*/
+        character.position.set(0,0,0);
+        character.scale.set(20,20,20);
+        scene.add(character);        
+        
+        mixer = new THREE.AnimationMixer(character);
+        action.walk = mixer.clipAction(geometry.animations[1]);
+//        action.walk.play();
+
+        animate();
+      });
+    }
+  );
+
 
   function animate(time) {
     requestAnimationFrame(animate);
@@ -111,24 +152,42 @@ function init() {
     controls.update();
     var time = new Date();
     //arm.rotation.y += (time - lastTime) * 0.0002;
-    arm.skeleton.bones[0].position.x = (rightElbow.x - rightWrist.x)/10;
-    arm.skeleton.bones[1].position.x = (rightShoulder.x - rightElbow.x)/10;
-    arm.skeleton.bones[2].position.x = (rightShoulder.x)/10;
-    arm.skeleton.bones[0].position.y = (rightElbow.y - rightWrist.y)/10;
-    arm.skeleton.bones[1].position.y = (rightShoulder.y - rightElbow.y)/10;
-    arm.skeleton.bones[2].position.y = (rightShoulder.y)/10;
+//    console.log(character.skeleton.bones[10].rotation);    
+    //character.skeleton.bones[10].rotation.z = Math.sin(rightShoulder.y - rightElbow.y * 0.002) * 0.5;
 
-    console.log(arm.skeleton.bones[0].position)
-    //console.log(arm.skeleton.bones[1].position)
+    var rightRag = Math.sin(Math.atan2(rightElbow.y - rightShoulder.y, rightElbow.x - rightShoulder.x))+1;
+    var leftRag = Math.sin(Math.atan2(leftElbow.y - leftShoulder.y, leftElbow.x - leftShoulder.x))+1;
+//    console.log(maxRightShoulderToElbow);
+//  console.log(Math.sin(Math.atan2(rightElbow.y - rightShoulder.y, rightElbow.x - rightShoulder.x) + 90));
+
+  character.skeleton.bones[10].rotation.x = -1* rightRag;
+  character.skeleton.bones[8].rotation.x = leftRag;
+
+  var delta = clock.getDelta();
+    mixer.update(delta);
+/*
+index.html:134 We {x: 0.0398766, y: 1.44493, z: 0.127301}//身体
+index.html:135 We {x: -1.07102e-8, y: 1.18078e-7, z: -0.204826}//尻尾つけね
+index.html:136 We {x: -1.5425e-9, y: -9.13598e-8, z: -0.647774}//尻尾先
+index.html:137 We {x: -1.07102e-8, y: 1.18078e-7, z: -0.204826}//左足つけね
+index.html:138 We {x: -1.39698e-8, y: 1.10173e-7, z: -0.613065}//左足先
+index.html:139 We {x: -1.07102e-8, y: 1.18078e-7, z: -0.204826}//右足付け根
+index.html:140 We {x: -1.21072e-8, y: 4.092e-8, z: -0.615352}//右足先
+index.html:141 We {x: -1.07102e-8, y: 1.18078e-7, z: -0.204826}//腰
+index.html:142 We {x: 3.24445e-9, y: 3.6971e-9, z: -0.662118}//左肩
+index.html:143 We {x: -1.86265e-9, y: -1.97051e-7, z: -0.339841}//左手
+index.html:144 We {x: 3.24445e-9, y: 3.6971e-9, z: -0.662118}//右肩
+index.html:145 We {x: -2.32831e-9, y: 6.4475e-8, z: -0.3863}//右手
+*/
+//console.log(arm.skeleton.bones[1].position)
     //console.log(arm.skeleton.bones[2].position)
 
 //    arm.skeleton.bones[2].rotation.x = Math.sin(time * 0.002) * .5;
-
     renderer.render(scene, controlCamera);
     lastTime = time;
   }
 
-  animate()
+  //animate()
 }
 
 init();
@@ -224,14 +283,23 @@ function drawKeypoints(keypoints, minConfidence, ctx, scale = 1) {
   for (let i = 0; i < keypoints.length; i++) {
     const keypoint = keypoints[i];
 
-    if (keypoint.part == "rightShoulder"){rightShoulder = keypoint.position}
-    if(keypoint.part == "rightElbow"){rightElbow = keypoint.position}
-    if(keypoint.part == "rightWrist"){rightWrist = keypoint.position}
-      
-
     if (keypoint.score < minConfidence) {
       continue;
     }
+
+    if(keypoint.part == "rightShoulder"){rightShoulder = keypoint.position}
+    if(keypoint.part == "rightElbow"){rightElbow = keypoint.position}
+    if(keypoint.part == "rightWrist"){rightWrist = keypoint.position}
+
+    if (keypoint.part == "leftShoulder"){leftShoulder = keypoint.position}
+    if(keypoint.part == "leftElbow"){leftElbow = keypoint.position}
+    if(keypoint.part == "leftWrist"){leftWrist = keypoint.position}
+
+    var maxRight = Math.sqrt(Math.pow(rightElbow.x - rightShoulder.x,2)+Math.pow(rightElbow.y - rightShoulder.y,2));
+    var maxLeft = Math.sqrt(Math.pow(leftElbow.x - leftShoulder.x,2)+Math.pow(leftElbow.y - leftShoulder.y,2));
+
+    maxRightShoulderToElbow = (maxRight > maxRightShoulderToElbow) ? maxRight : maxRightShoulderToElbow;
+    maxLeftShoulderToElbow = (maxLeft > maxLeftShoulderToElbow) ? maxLeft : maxLeftShoulderToElbow;
 
     const { y, x } = keypoint.position;
     ctx.beginPath();
