@@ -166,7 +166,9 @@ function init() {
 
   var leftCos = nowLeftShoulderToElbow / maxLeftShoulderToElbow
   var rightCos = nowRightShoulderToElbow / maxRightShoulderToElbow
-  console.log(character.skeleton.bones[8].rotation);
+  character.skeleton.bones[8].rotation.z = (leftCos > 0)?-3.25 * leftCos: -3.25 - 3.25 * leftCos;
+  character.skeleton.bones[10].rotation.z = (rightCos > 0)?-3.25 + 3.25 * rightCos:3.25 * rightCos;
+console.log(.25 + 3.25 * leftCos);
 
 //  character.skeleton.bones[10].rotation.z = 0;//-1 * rightCos;
 //  character.skeleton.bones[8].rotation.z = -3;//leftCos;
@@ -308,6 +310,13 @@ function drawKeypoints(keypoints, minConfidence, ctx, scale = 1) {
 
     nowRightShoulderToElbow = Math.sqrt(Math.pow(rightElbow.x - rightShoulder.x,2)+Math.pow(rightElbow.y - rightShoulder.y,2));
     nowLeftShoulderToElbow  = Math.sqrt(Math.pow(leftElbow.x - leftShoulder.x,2)+Math.pow(leftElbow.y - leftShoulder.y,2));
+    if (rightElbow.y < rightShoulder.y) {
+      nowRightShoulderToElbow = nowRightShoulderToElbow * -1;
+    }
+    if (leftElbow.y < leftShoulder.y) {
+      nowLeftShoulderToElbow = nowLeftShoulderToElbow * -1;
+    }
+
     maxRightShoulderToElbow = (nowRightShoulderToElbow > maxRightShoulderToElbow) ? nowRightShoulderToElbow: maxRightShoulderToElbow;
     maxLeftShoulderToElbow = (nowLeftShoulderToElbow > maxLeftShoulderToElbow)? nowLeftShoulderToElbow : maxLeftShoulderToElbow;
 
