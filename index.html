@@ -173,6 +173,7 @@ function init() {
   var rightCos = nowRightShoulderToElbow / maxRightShoulderToElbow
   character.skeleton.bones[8].rotation.z = (leftCos > 0)?-3.25 * leftCos: -3.25 - 3.25 * leftCos;
   character.skeleton.bones[10].rotation.z = (rightCos > 0)?-3.25 + 3.25 * rightCos:3.25 * rightCos;
+  character.position(centerBody.x,centerBody.y,0);
 console.log(.25 + 3.25 * leftCos);
 
 //  character.skeleton.bones[10].rotation.z = 0;//-1 * rightCos;
@@ -328,7 +329,8 @@ function drawKeypoints(keypoints, minConfidence, ctx, scale = 1) {
     if (keypoint.part == "rightHip"){
         s1 = (rightHip.x - leftShoulder.x) * (rightShoulder.y - leftShoulder.y) - (rightHip.y - leftShoulder.y) * (rightShoulder.x - leftShoulder.x)
         s2 = (rightHip.x - leftShoulder.x) * (leftShoulder.y - leftHip.y) - (rightHip.y - leftShoulder.y) * (leftHip.x - leftHip.x)
-        centerBody =  rightShoulder.x + (leftHip.x - rightShoulder.x) * s1 / (s1 + s2), rightShoulder.y + (leftHip.y - rightShoulder.y) * s1 / (s1 + s2)
+        centerBody.x = rightShoulder.x + (leftHip.x - rightShoulder.x) * s1 / (s1 + s2)
+        centerBody.y = rightShoulder.y + (leftHip.y - rightShoulder.y) * s1 / (s1 + s2)
     }
 
     maxRightShoulderToElbow = (nowRightShoulderToElbow > maxRightShoulderToElbow) ? nowRightShoulderToElbow: maxRightShoulderToElbow;
