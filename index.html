@@ -32,6 +32,11 @@ var leftShoulder ={x:0,y:0}
 var leftElbow={x:0,y:0}
 var leftWrist={x:0,y:0}
 
+var rightHip ={x:0,y:0}
+var leftHip ={x:0,y:0}
+
+var centerBody={x:0,y:0}
+
 const videoWidth = 500;
 const videoHeight = 500;
 //----- ここから３D描画 -----//
@@ -304,9 +309,12 @@ function drawKeypoints(keypoints, minConfidence, ctx, scale = 1) {
     if(keypoint.part == "rightElbow"){rightElbow = keypoint.position}
     if(keypoint.part == "rightWrist"){rightWrist = keypoint.position}
 
-    if (keypoint.part == "leftShoulder"){leftShoulder = keypoint.position}
+    if(keypoint.part == "leftShoulder"){leftShoulder = keypoint.position}
     if(keypoint.part == "leftElbow"){leftElbow = keypoint.position}
     if(keypoint.part == "leftWrist"){leftWrist = keypoint.position}
+
+    if(keypoint.part == "rightHip"){rightHip = keypoint.position}
+    if(keypoint.part == "leftHip"){leftHip = keypoint.position}
 
     nowRightShoulderToElbow = Math.sqrt(Math.pow(rightElbow.x - rightShoulder.x,2)+Math.pow(rightElbow.y - rightShoulder.y,2));
     nowLeftShoulderToElbow  = Math.sqrt(Math.pow(leftElbow.x - leftShoulder.x,2)+Math.pow(leftElbow.y - leftShoulder.y,2));
@@ -315,6 +323,12 @@ function drawKeypoints(keypoints, minConfidence, ctx, scale = 1) {
     }
     if (leftElbow.y < leftShoulder.y) {
       nowLeftShoulderToElbow = nowLeftShoulderToElbow * -1;
+    }
+
+    if (keypoint.part == "rightHip"){
+        s1 = (rightHip.x - leftShoulder.x) * (rightShoulder.y - leftShoulder.y) - (rightHip.y - leftShoulder.y) * (rightShoulder.x - leftShoulder.x)
+        s2 = (rightHip.x - leftShoulder.x) * (leftShoulder.y - leftHip.y) - (rightHip.y - leftShoulder.y) * (leftHip.x - leftHip.x)
+        centerBody =  rightShoulder.x + (leftHip.x - rightShoulder.x) * s1 / (s1 + s2), rightShoulder.y + (leftHip.y - rightShoulder.y) * s1 / (s1 + s2)
     }
 
     maxRightShoulderToElbow = (nowRightShoulderToElbow > maxRightShoulderToElbow) ? nowRightShoulderToElbow: maxRightShoulderToElbow;
