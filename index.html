@@ -115,6 +115,38 @@ function init() {
 
   //scene.add(arm);
   //scene.add(skeletonHelper);
+
+//MMD読む用
+// Instantiate a loader
+/*
+var loader = new THREE.MMDLoader();
+
+// Load a MMD model
+loader.load(
+	// path to PMD/PMX file
+	'models/mmd/miku.pmd',
+	// called when the resource is loaded
+	function ( mesh ) {
+
+		scene.add( mesh );
+
+	},
+	// called when loading is in progresses
+	function ( xhr ) {
+
+		console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+
+	},
+	// called when loading has errors
+	function ( error ) {
+
+		console.log( 'An error happened' );
+
+	}
+);
+*/
+//
+
   var character;
   var mixer;
   var action = {};
@@ -173,7 +205,7 @@ function init() {
   var rightCos = nowRightShoulderToElbow / maxRightShoulderToElbow
   character.skeleton.bones[8].rotation.z = (leftCos > 0)?-3.25 * leftCos: -3.25 - 3.25 * leftCos;
   character.skeleton.bones[10].rotation.z = (rightCos > 0)?-3.25 + 3.25 * rightCos:3.25 * rightCos;
-  character.position(centerBody.x,centerBody.y,0);
+  //character.position.set(centerBody.x,centerBody.y,0);
 console.log(.25 + 3.25 * leftCos);
 
 //  character.skeleton.bones[10].rotation.z = 0;//-1 * rightCos;
