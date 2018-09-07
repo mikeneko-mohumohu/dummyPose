@@ -8,6 +8,8 @@
     <!-- THREE JS -->
     <script src="js/three.min.js"></script>
     <script src="js/OrbitControls.js"></script>
+    <script src="js/MMDLoader.js"></script>
+    <script src="js/mmdparser.min.js"></script>
   </head>
 
   <body>    
@@ -116,40 +118,10 @@ function init() {
   //scene.add(arm);
   //scene.add(skeletonHelper);
 
-//MMD読む用
-// Instantiate a loader
-/*
-var loader = new THREE.MMDLoader();
-
-// Load a MMD model
-loader.load(
-	// path to PMD/PMX file
-	'models/mmd/miku.pmd',
-	// called when the resource is loaded
-	function ( mesh ) {
-
-		scene.add( mesh );
-
-	},
-	// called when loading is in progresses
-	function ( xhr ) {
-
-		console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-
-	},
-	// called when loading has errors
-	function ( error ) {
-
-		console.log( 'An error happened' );
-
-	}
-);
-*/
-//
-
   var character;
   var mixer;
   var action = {};
+  var mesh;
   var textureLoader = new THREE.TextureLoader();
   textureLoader.load('./model/fox.png',
     texture => {
@@ -158,23 +130,49 @@ loader.load(
         skinning: true,// これ忘れないよう注意　スキンとボーンの追従
       });
 
+      //MMD読む用
+      // Instantiate a loader
+
+      var loader = new THREE.MMDLoader();
+
+      // Load a MMD model
+      // loader.load(path to PMD/PMX file, called when the resource is loaded
+      loader.load('models/mmd/miku.pmd'
+        ,function ( object ) {
+          mesh = object;
+          console.log(mesh.skeleton);
+          scene.add( mesh );
+          mesh.position.set(0,0,0)
+          mesh.scale.set(1,1,1);
+	      },
+	      // called when loading is in progresses
+	      function ( xhr ) {
+          console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+          if (xhr.loaded / xhr.total * 100 == 100) {
+            animate();
+          }
+	      },
+	      // called when loading has errors
+	      function ( error ) {
+		      console.log( 'An error happened' );
+	      }
+      );
+
       var loader = new THREE.JSONLoader();
       loader.load('./model/fox.json', function(geometry) {
         character = new THREE.SkinnedMesh(geometry, material);
-/*
-        var characterSkeletonHelper = new THREE.SkeletonHelper(character);
-        characterSkeletonHelper.material.linewidth = 10;
-        scene.add(characterSkeletonHelper);
-*/
+
+        //var characterSkeletonHelper = new THREE.SkeletonHelper(character);
+        //characterSkeletonHelper.material.linewidth = 10;
+        //scene.add(characterSkeletonHelper);
+
         character.position.set(0,0,0);
         character.scale.set(20,20,20);
-        scene.add(character);        
+        //scene.add(character);        
         
         mixer = new THREE.AnimationMixer(character);
         action.walk = mixer.clipAction(geometry.animations[1]);
 //        action.walk.play();
-
-        animate();
       });
     }
   );
@@ -203,10 +201,13 @@ loader.load(
 
   var leftCos = nowLeftShoulderToElbow / maxLeftShoulderToElbow
   var rightCos = nowRightShoulderToElbow / maxRightShoulderToElbow
-  character.skeleton.bones[8].rotation.z = (leftCos > 0)?-3.25 * leftCos: -3.25 - 3.25 * leftCos;
-  character.skeleton.bones[10].rotation.z = (rightCos > 0)?-3.25 + 3.25 * rightCos:3.25 * rightCos;
+  //character.skeleton.bones[8].rotation.z = (leftCos > 0)?-3.25 * leftCos: -3.25 - 3.25 * leftCos;
+  //character.skeleton.bones[10].rotation.z = (rightCos > 0)?-3.25 + 3.25 * rightCos:3.25 * rightCos;
   //character.position.set(centerBody.x,centerBody.y,0);
-console.log(.25 + 3.25 * leftCos);
+//console.log(.25 + 3.25 * leftCos);
+//  mesh.skeleton.bones[40].rotation.z = (leftCos > 0)?-3.25 * leftCos: -3.25 - 3.25 * leftCos;
+
+console.log(mesh.skeleton.bones[40].rotation);
 
 //  character.skeleton.bones[10].rotation.z = 0;//-1 * rightCos;
 //  character.skeleton.bones[8].rotation.z = -3;//leftCos;
