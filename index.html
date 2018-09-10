@@ -10,6 +10,8 @@
     <script src="js/OrbitControls.js"></script>
     <script src="js/MMDLoader.js"></script>
     <script src="js/mmdparser.min.js"></script>
+    <script src="js/Quaternion.js"></script>
+    <script src="js/Vector3.js"></script>
   </head>
 
   <body>    
@@ -213,10 +215,17 @@ function init() {
   var leftElbowRad = Math.atan2(leftShoulder.y - leftElbow.y, leftShoulder.x - leftElbow.x) + Math.atan(180);
 
 console.log(leftElbowRad * 180 / Math.PI);
+var target = new THREE.Quaternion();
+var axis = new THREE.Vector3(1, 0, 1).normalize();
+target.setFromAxisAngle(axis, - rightElbowRad);
 //右肩
-mesh.skeleton.bones[38].rotation.x = - rightElbowRad;
+//mesh.skeleton.bones[38].rotation.x = - rightElbowRad;
+//mesh.skeleton.bones[38].rotation.z = - rightElbowRad;
+//target.multiply(mesh.skeleton.bones[38].quaternion);  
+mesh.skeleton.bones[38].quaternion.copy(target);  
+
 //左肩
-mesh.skeleton.bones[66].rotation.x = leftElbowRad;
+//mesh.skeleton.bones[66].rotation.x = leftElbowRad;
 
 //  character.skeleton.bones[10].rotation.z = 0;//-1 * rightCos;
 //  character.skeleton.bones[8].rotation.z = -3;//leftCos;
