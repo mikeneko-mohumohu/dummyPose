@@ -213,8 +213,9 @@ function init() {
   var leftElbowRad = Math.atan2(leftShoulder.y - leftElbow.y, leftShoulder.x - leftElbow.x) + Math.atan(180);
 
 console.log(leftElbowRad * 180 / Math.PI);
+//右肩
 mesh.skeleton.bones[38].rotation.x = - rightElbowRad;
-
+//左肩
 mesh.skeleton.bones[66].rotation.x = leftElbowRad;
 
 //  character.skeleton.bones[10].rotation.z = 0;//-1 * rightCos;
