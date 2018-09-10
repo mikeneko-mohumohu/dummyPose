@@ -207,7 +207,15 @@ function init() {
 //console.log(.25 + 3.25 * leftCos);
 //  mesh.skeleton.bones[40].rotation.z = (leftCos > 0)?-3.25 * leftCos: -3.25 - 3.25 * leftCos;
 
-console.log(mesh.skeleton.bones[40].rotation);
+
+  //rad = Math.atan2(rightElbow.y - rightShoulder.y, rightElbow.x - rightShoulder.x);  
+  var rightElbowRad = Math.atan2(rightShoulder.y - rightElbow.y, rightShoulder.x - rightElbow.x) + Math.atan(180);
+  var leftElbowRad = Math.atan2(leftShoulder.y - leftElbow.y, leftShoulder.x - leftElbow.x) + Math.atan(180);
+
+console.log(leftElbowRad * 180 / Math.PI);
+mesh.skeleton.bones[38].rotation.x = - rightElbowRad;
+
+mesh.skeleton.bones[66].rotation.x = leftElbowRad;
 
 //  character.skeleton.bones[10].rotation.z = 0;//-1 * rightCos;
 //  character.skeleton.bones[8].rotation.z = -3;//leftCos;
@@ -215,18 +223,29 @@ console.log(mesh.skeleton.bones[40].rotation);
   var delta = clock.getDelta();
     mixer.update(delta);
 /*
-index.html:134 We {x: 0.0398766, y: 1.44493, z: 0.127301}//身体
-index.html:135 We {x: -1.07102e-8, y: 1.18078e-7, z: -0.204826}//尻尾つけね
-index.html:136 We {x: -1.5425e-9, y: -9.13598e-8, z: -0.647774}//尻尾先
-index.html:137 We {x: -1.07102e-8, y: 1.18078e-7, z: -0.204826}//左足つけね
-index.html:138 We {x: -1.39698e-8, y: 1.10173e-7, z: -0.613065}//左足先
-index.html:139 We {x: -1.07102e-8, y: 1.18078e-7, z: -0.204826}//右足付け根
-index.html:140 We {x: -1.21072e-8, y: 4.092e-8, z: -0.615352}//右足先
-index.html:141 We {x: -1.07102e-8, y: 1.18078e-7, z: -0.204826}//腰
-index.html:142 We {x: 3.24445e-9, y: 3.6971e-9, z: -0.662118}//左肩
-index.html:143 We {x: -1.86265e-9, y: -1.97051e-7, z: -0.339841}//左手
-index.html:144 We {x: 3.24445e-9, y: 3.6971e-9, z: -0.662118}//右肩
-index.html:145 We {x: -2.32831e-9, y: 6.4475e-8, z: -0.3863}//右手
+sd {uuid: "5E2DCC71-BBE8-4A7C-B4E4-58D3731C608F", name: "センター", type: "Bone", parent: td, children: Array(6), …}1:
+sd {uuid: "EC7131AB-0ABF-44C5-8241-CE4A35E53C67", name: "ﾈｸﾀｲＩＫ", type: "Bone", parent: sd, children: Array(1), …}2:
+sd {uuid: "528A2D4B-1BF2-48E7-8DCD-4422BD86159B", name: "ﾈｸﾀｲＩＫ先", type: "Bone", parent: sd, children: Array(0), …}3:
+sd {uuid: "940453AD-B31D-40B3-B83F-FABE4F501F60", name: "センター先", type: "Bone", parent: sd, children: Array(0), …}4:
+sd {uuid: "93239656-FECB-4DEF-9DF1-848BCE04F716", name: "下半身", type: "Bone", parent: sd, children: Array(7), …}5:
+sd {uuid: "80C07C6A-A3FA-4EB5-80E4-C9504549043A", name: "左足ＩＫ", type: "Bone", parent: td, children: Array(2), …}14:
+sd {uuid: "A2CEE414-DFD8-4F29-A213-43C5CBA2559F", name: "右足ＩＫ", type: "Bone", parent: td, children: Array(2), …}15:
+sd {uuid: "D88CC167-C8C1-4DF4-9BFD-79FD60674C5B", name: "下半身先", type: "Bone", parent: sd, children: Array(0), …}32:
+sd {uuid: "7F52269C-93E2-4D73-AAAD-33599A3C4559", name: "上半身", type: "Bone", parent: sd, children: Array(1), …}33:
+sd {uuid: "6A3631B9-E0AC-466C-8A7C-3F93E154C092", name: "上半身2", type: "Bone", parent: sd, children: Array(4), …}34:
+sd {uuid: "3FB433A3-FEC2-4D4C-A2ED-2696D87023B4", name: "右肩", type: "Bone", parent: sd, children: Array(1), …}38:
+sd {uuid: "A5A037B7-64D8-4130-9337-74702C5DA7AD", name: "右腕", type: "Bone", parent: sd, children: Array(1), …}39:
+sd {uuid: "6414D1C8-F1DC-44B9-937F-65BEBC343B1C", name: "右腕捩", type: "Bone", parent: sd, children: Array(1), …}40:
+sd {uuid: "A5F3C532-DF32-438B-BFCF-9D7DB9739412", name: "右ひじ", type: "Bone", parent: sd, children: Array(2), …}41:
+sd {uuid: "4137EEF6-31EC-4DFD-A04F-53741743ADFF", name: "右手捩", type: "Bone", parent: sd, children: Array(1), …}42:
+sd {uuid: "1F551BD0-A743-4066-9F8E-6B403E6077FD", name: "左肩", type: "Bone", parent: sd, children: Array(1), …}66:
+sd {uuid: "0EA6C6B3-68D5-4361-9C87-FAFFCB2A5E3A", name: "左腕", type: "Bone", parent: sd, children: Array(1), …}67:
+sd {uuid: "4ADC4116-B759-48B7-BF7F-B73F96AC9EB3", name: "左腕捩", type: "Bone", parent: sd, children: Array(1), …}68:
+sd {uuid: "96AA73C9-3783-4D76-80F8-7684DDF85BA2", name: "左ひじ", type: "Bone", parent: sd, children: Array(2), …}69:
+sd {uuid: "B6267FCB-71B8-4E61-842A-4F96819F6778", name: "左手捩", type: "Bone", parent: sd, children: Array(1), …}70:
+sd {uuid: "2B86360D-2477-4160-8B3A-09198C3469F9", name: "首", type: "Bone", parent: sd, children: Array(1), …}94:
+sd {uuid: "3B235038-3136-4FA8-A838-890667DC0519", name: "頭", type: "Bone", parent: sd, children: Array(2), …}95:
+
 */
 //console.log(arm.skeleton.bones[1].position)
     //console.log(arm.skeleton.bones[2].position)
