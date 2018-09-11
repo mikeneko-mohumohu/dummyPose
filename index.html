@@ -213,48 +213,39 @@ function init() {
   //rad = Math.atan2(rightElbow.y - rightShoulder.y, rightElbow.x - rightShoulder.x);  
   var rightElbowRad = -1 * (Math.atan2(rightShoulder.y - rightElbow.y, rightShoulder.x - rightElbow.x) + Math.atan(180));
   var leftElbowRad = Math.atan2(leftShoulder.y - leftElbow.y, leftShoulder.x - leftElbow.x) + Math.atan(180);
-  var rightWristWRad = -1*(Math.atan2(rightElbow.y - rightWrist.y, rightElbow.x - rightWrist.x));
+  var rightWristWRad = -1 * (Math.atan2(rightElbow.y - rightWrist.y, rightElbow.x - rightWrist.x));
+  var leftWristRad = Math.atan2(leftElbow.y - leftWrist.y, leftElbow.x - leftWrist.x);
 
-
-//x軸での回転
-var target = new THREE.Quaternion();
+//右肩からひじ
+var targetRightElbow = new THREE.Quaternion();
 var axisX = new THREE.Vector3(2, 0, 1).normalize();
 rightElbowRad = rightElbowRad - mesh.skeleton.bones[38].rotation.x;
-target.setFromAxisAngle(axisX, rightElbowRad);
-//右肩
-//mesh.skeleton.bones[38].rotation.x = - rightElbowRad;
-//mesh.skeleton.bones[38].rotation.z = - rightElbowRad;
-target.multiply(mesh.skeleton.bones[38].quaternion.clone());
-mesh.skeleton.bones[38].quaternion.copy(target);
-
+targetRightElbow.setFromAxisAngle(axisX, rightElbowRad);
+targetRightElbow.multiply(mesh.skeleton.bones[38].quaternion.clone());
+mesh.skeleton.bones[38].quaternion.copy(targetRightElbow);
 // 右腕（袖の影響を受ける）
 var targetWristW = new THREE.Quaternion();
-var axisWristXW = new THREE.Vector3(-1, 0, 2).normalize();
+var axisWristW = new THREE.Vector3(-1, 0, 2).normalize();
 rightWristWRad = rightWristWRad - mesh.skeleton.bones[40].rotation.z;
-targetWristW.setFromAxisAngle(axisWristXW, rightWristWRad);
+targetWristW.setFromAxisAngle(axisWristW, rightWristWRad);
 targetWristW.multiply(mesh.skeleton.bones[40].quaternion.clone());
 mesh.skeleton.bones[40].quaternion.copy(targetWristW);
 
+//左肩からひじ
+var targetLeftElbow = new THREE.Quaternion();
+var axisLeftElbow = new THREE.Vector3(2, 0, 1).normalize();
+leftElbowRad = leftElbowRad - mesh.skeleton.bones[66].rotation.x;
+targetLeftElbow.setFromAxisAngle(axisLeftElbow, leftElbowRad);
+targetLeftElbow.multiply(mesh.skeleton.bones[66].quaternion.clone());
+mesh.skeleton.bones[66].quaternion.copy(targetLeftElbow);
 
-/*
-//z軸での回転
-var target = new THREE.Quaternion();
-var axisZ = new THREE.Vector3(0, 0, 1).normalize();
-
-rightElbowRad = rightElbowRad - mesh.skeleton.bones[38].rotation.z;
-target.setFromAxisAngle(axisZ, rightElbowRad);
-//右肩
-//mesh.skeleton.bones[38].rotation.x = - rightElbowRad;
-//mesh.skeleton.bones[38].rotation.z = - rightElbowRad;
-target.multiply(mesh.skeleton.bones[38].quaternion.clone());
-mesh.skeleton.bones[38].quaternion.copy(target);
-*/
-
-//左肩
-//mesh.skeleton.bones[66].rotation.x = leftElbowRad;
-
-//  character.skeleton.bones[10].rotation.z = 0;//-1 * rightCos;
-//  character.skeleton.bones[8].rotation.z = -3;//leftCos;
+//左腕（袖の影響受ける）
+var targetLeftWristW = new THREE.Quaternion();
+var axisLeftWrist = new THREE.Vector3(1, 0, 2).normalize();
+leftWristRad = leftWristRad - mesh.skeleton.bones[68].rotation.z;
+targetLeftWristW.setFromAxisAngle(axisLeftWrist, leftWristRad);
+targetLeftWristW.multiply(mesh.skeleton.bones[68].quaternion.clone());
+mesh.skeleton.bones[68].quaternion.copy(targetLeftWristW);
 
   var delta = clock.getDelta();
     mixer.update(delta);
