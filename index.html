@@ -63,7 +63,7 @@ function init() {
   var gridHelper = new THREE.GridHelper(200,5);
   scene.add(gridHelper);
   var axisHelper = new THREE.AxesHelper(300);
-  //scene.add(axisHelper);
+  scene.add(axisHelper);
 
   var controlCamera = new THREE.PerspectiveCamera(45, width / height, 1, 4000);
   controlCamera.position.set(0,10,100);
@@ -211,18 +211,44 @@ function init() {
 
 
   //rad = Math.atan2(rightElbow.y - rightShoulder.y, rightElbow.x - rightShoulder.x);  
-  var rightElbowRad = Math.atan2(rightShoulder.y - rightElbow.y, rightShoulder.x - rightElbow.x) + Math.atan(180);
+  var rightElbowRad = -1 * (Math.atan2(rightShoulder.y - rightElbow.y, rightShoulder.x - rightElbow.x) + Math.atan(180));
   var leftElbowRad = Math.atan2(leftShoulder.y - leftElbow.y, leftShoulder.x - leftElbow.x) + Math.atan(180);
+  var rightWristWRad = -1*(Math.atan2(rightElbow.y - rightWrist.y, rightElbow.x - rightWrist.x));
 
-console.log(leftElbowRad * 180 / Math.PI);
+
+//x軸での回転
 var target = new THREE.Quaternion();
-var axis = new THREE.Vector3(1, 0, 1).normalize();
-target.setFromAxisAngle(axis, - rightElbowRad);
+var axisX = new THREE.Vector3(2, 0, 1).normalize();
+rightElbowRad = rightElbowRad - mesh.skeleton.bones[38].rotation.x;
+target.setFromAxisAngle(axisX, rightElbowRad);
 //右肩
 //mesh.skeleton.bones[38].rotation.x = - rightElbowRad;
 //mesh.skeleton.bones[38].rotation.z = - rightElbowRad;
-//target.multiply(mesh.skeleton.bones[38].quaternion);  
-mesh.skeleton.bones[38].quaternion.copy(target);  
+target.multiply(mesh.skeleton.bones[38].quaternion.clone());
+mesh.skeleton.bones[38].quaternion.copy(target);
+
+// 右腕（袖の影響を受ける）
+var targetWristW = new THREE.Quaternion();
+var axisWristXW = new THREE.Vector3(-1, 0, 2).normalize();
+rightWristWRad = rightWristWRad - mesh.skeleton.bones[40].rotation.z;
+targetWristW.setFromAxisAngle(axisWristXW, rightWristWRad);
+targetWristW.multiply(mesh.skeleton.bones[40].quaternion.clone());
+mesh.skeleton.bones[40].quaternion.copy(targetWristW);
+
+
+/*
+//z軸での回転
+var target = new THREE.Quaternion();
+var axisZ = new THREE.Vector3(0, 0, 1).normalize();
+
+rightElbowRad = rightElbowRad - mesh.skeleton.bones[38].rotation.z;
+target.setFromAxisAngle(axisZ, rightElbowRad);
+//右肩
+//mesh.skeleton.bones[38].rotation.x = - rightElbowRad;
+//mesh.skeleton.bones[38].rotation.z = - rightElbowRad;
+target.multiply(mesh.skeleton.bones[38].quaternion.clone());
+mesh.skeleton.bones[38].quaternion.copy(target);
+*/
 
 //左肩
 //mesh.skeleton.bones[66].rotation.x = leftElbowRad;
