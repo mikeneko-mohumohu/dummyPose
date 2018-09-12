@@ -212,9 +212,11 @@ function init() {
 
   //rad = Math.atan2(rightElbow.y - rightShoulder.y, rightElbow.x - rightShoulder.x);  
   var rightElbowRad = -1 * (Math.atan2(rightShoulder.y - rightElbow.y, rightShoulder.x - rightElbow.x) + Math.atan(180));
-  var leftElbowRad = Math.atan2(leftShoulder.y - leftElbow.y, leftShoulder.x - leftElbow.x) + Math.atan(180);
   var rightWristWRad = -1 * (Math.atan2(rightElbow.y - rightWrist.y, rightElbow.x - rightWrist.x));
+  var leftElbowRad = Math.atan2(leftShoulder.y - leftElbow.y, leftShoulder.x - leftElbow.x) + Math.atan(180);
   var leftWristRad = Math.atan2(leftElbow.y - leftWrist.y, leftElbow.x - leftWrist.x);
+  leftWristRad = Math.PI - leftWristRad;
+//  console.log(Math.tan(360 - leftWristRad * 180 / Math.PI * 2))
 
 //右肩からひじ
 var targetRightElbow = new THREE.Quaternion();
@@ -233,12 +235,11 @@ mesh.skeleton.bones[40].quaternion.copy(targetWristW);
 
 //左肩からひじ
 var targetLeftElbow = new THREE.Quaternion();
-var axisLeftElbow = new THREE.Vector3(2, 0, 1).normalize();
+var axisLeftElbow = new THREE.Vector3(2, 0, -1).normalize();
 leftElbowRad = leftElbowRad - mesh.skeleton.bones[66].rotation.x;
 targetLeftElbow.setFromAxisAngle(axisLeftElbow, leftElbowRad);
 targetLeftElbow.multiply(mesh.skeleton.bones[66].quaternion.clone());
 mesh.skeleton.bones[66].quaternion.copy(targetLeftElbow);
-
 //左腕（袖の影響受ける）
 var targetLeftWristW = new THREE.Quaternion();
 var axisLeftWrist = new THREE.Vector3(1, 0, 2).normalize();
